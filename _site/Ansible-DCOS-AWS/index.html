@@ -97,21 +97,27 @@ $ ssh-add ~/.ssh/&lt;amazon key file&gt;
 
 <h2 id="getting-started">Getting started</h2>
 <p>Begin by cloning the repository</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ git clone https://github.com/olatheander/ansible-dcos-aws-playbook.git
 </code></pre>
 </div>
+
 <p>Initialize the Git submodules (the generic Ansible roles are included in the playbook as submodules)</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ git submodule update --recursive --init
 </code></pre>
 </div>
 
 <p>Configure the AWS environment variables:</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ export AWS_EC2_KEY_PAIR = &lt;the name of the key-pair for EC2 instances&gt;
 $ export AWS_EC2_LB_CERT = &lt;the arn resource for the AWS ELB certificate&gt;
 $ export AWS_S3_ELB_LOGS_BUCKET_NAME = &lt;the name of the S3 bucket where to store the ELB logs&gt;
 </code></pre>
 </div>
+
 <p>By defining these two variables a simple hello-world demo is installed on the cluster that we will later experiment with.</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ export DCOS_CONTROLLER_INSTALL_DEMOS = true
 $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
 </code></pre>
@@ -126,6 +132,7 @@ $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
 </ul>
 
 <h3 id="project-layout">Project layout</h3>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>.
 |-- community
 |   `-- roles
@@ -140,14 +147,17 @@ $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
     `-- aws
 </code></pre>
 </div>
+
 <p>If you have some previous experience of Ansible this is probably old hat (read more about <a href="http://docs.ansible.com/ansible/playbooks_best_practices.html">best-practices</a>) but worth mentioning is the reusable roles included that are all stored in <code class="highlighter-rouge">./community/roles</code>
  as Git submodules. This is also the option of using <a href="https://galaxy.ansible.com/">Ansible Galaxy</a>, recently open-sourced, but I prefer the submodule approach.</p>
 
 <h2 id="run-playbooks-to-setup-the-cluster">Run playbooks to setup the cluster</h2>
 <p>Setting up the cluster consists of running two playbooks, first:</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ ansible-playbook -i ec2.py main.yml
 </code></pre>
 </div>
+
 <p>This playbook configures the AWS infrastructure by allocating EC2 instances, setting up VPC, load-balancer, network gateways etc. Running the playbook, you will see a lot of tasks scrolling by and it will take a few minutes to complete. When done there should be no errors and a message like:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>TASK [debug] *******************************************************************
@@ -169,9 +179,11 @@ localhost                  : ok=18   changed=3    unreachable=0    failed=0
 <p><strong>Note, dont keep the cluster running for long</strong> if you’re just experimenting. Tear down the cluster when done, see end of this article for instructions. For DCOS to be able to schedule containers onto the nodes its better to have fewer big nodes rather than many small since the scheduler may not be able to find a node with enough free resources if nodes are too small. The downside is that this node type is pretty expensive.</p>
 
 <p>Next step is to provision the allocated resources i.e. setting up a DCOS cluster on top. Do this by running the playbook <code class="highlighter-rouge">provision_cluster.yml</code>. This playbook is basically a straightforward implementation of the <a href="https://dcos.io/docs/1.9/administration/installing/custom/advanced/">Advanced DC/OS Installation Guide</a>.</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ ansible-playbook -i ec2.py provision_cluster.yml -u ubuntu
 </code></pre>
 </div>
+
 <p>The <code class="highlighter-rouge">-u</code> switch tells Ansible which user to use when authenticating towards the EC2 instances. By default, the AMI (<code class="highlighter-rouge">ami-c06b1eb3</code>) provisioned is <em>Ubuntu Xenial 16.04</em> but <em>CentOS</em> and eventually <em>CoreOS</em> will also be supported. <code class="highlighter-rouge">-i</code> is the inventory parameter and <code class="highlighter-rouge">ec2.py</code> is the <a href="http://docs.ansible.com/ansible/intro_dynamic_inventory.html">dynamic inventory</a> script for AWS.</p>
 
 <p>When running you might face an error like below and the reason is most likely that the instances are not fully initialized yet. If this happens cancel the playbook and retry. When all nodes can be reached, let the playbook run to completion. I plan to fix this bug in a later version of the playbook by waiting until all nodes respond to SSH connections.</p>
@@ -184,6 +196,7 @@ fatal: [10.0.1.217]: UNREACHABLE! =&gt; {"changed": false, "msg": "Failed to con
 <p>There will also be a couple of ignored error related to python-pip but this is normal and just the role checking if pip is installed.</p>
 
 <p>It will take a couple of minutes setting up the cluster. Once the playbook is done you will see output like:</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>TASK [dcos-controller : Launch external Dockercloud hello-world sample application.] ***
 changed: [10.0.0.250]
 
@@ -202,6 +215,7 @@ PLAY RECAP *********************************************************************
 </div>
 
 <h2 id="play-with-the-cluster">Play with the cluster</h2>
+
 <p>Now that the cluster is up let’s play with it for a bit. By defining the environment variables <code class="highlighter-rouge">DCOS_CONTROLLER_INSTALL_DEMOS</code> and <code class="highlighter-rouge">DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD</code> the cluster is already up and running with the <a href="https://github.com/mesosphere/marathon-lb">Marathon load-balancer</a> and a simple Hello-world application that we can use to get to know the setup a bit better.</p>
 
 <p>First let’s check the AWS ELB status since it may take some time for it to detect the nodes being up and running.</p>
@@ -213,11 +227,15 @@ PLAY RECAP *********************************************************************
 <p><img src="/images/posts/2016-11-16-Ansible-DCOS-AWS/Dockercloud Hello-world.png" alt="_config.yml" /></p>
 
 <h3 id="log-in-on-the-dcos-admin">Log in on the DCOS admin</h3>
+
 <p>To be able to do some interesting stuff we need to be able to access the DCOS admin console and thats done by opening a SSH tunnel via the <em>dcos-ssh-jumphost</em> instance as:</p>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>$ ssh -i &lt;path-to-ssh-key&gt; -L 8443:&lt;master-private-dns&gt;:443 ubuntu@&lt;public-dns-of-ssh-jumphost&gt;
 </code></pre>
 </div>
+
 <p>where</p>
+
 <ul>
   <li><code class="highlighter-rouge">path-to-ssh-key</code> — your private key used above for provisioning the cluster nodes. The <code class="highlighter-rouge">-i</code> switch is not needed if you’re setting up the tunnel from your <code class="highlighter-rouge">ssh-agent</code> shell.</li>
   <li><code class="highlighter-rouge">master-private-dns</code> — the private DNS name of one of the <em>dcos-master</em> nodes, e.g. <code class="highlighter-rouge">ip-10-0-1-217.eu-west-1.compute.internal</code>.</li>

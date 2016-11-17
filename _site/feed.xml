@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://localhost:4000/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.3.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2016-11-16T17:13:50+01:00</updated><id>http://localhost:4000//</id><title type="html">Ola Theander’s blog</title><subtitle>Software Engineer with special interest in Distributed Computing and Cloud Technology</subtitle><entry><title type="html">Provisioning DC/OS on AWS using Ansible</title><link href="http://localhost:4000/Ansible-DCOS-AWS/" rel="alternate" type="text/html" title="Provisioning DC/OS on AWS using Ansible" /><published>2016-11-16T00:00:00+01:00</published><updated>2016-11-16T00:00:00+01:00</updated><id>http://localhost:4000/Ansible-DCOS-AWS</id><content type="html" xml:base="http://localhost:4000/Ansible-DCOS-AWS/">&lt;p&gt;In this first post I’ll present my current pet project for provisioning DC/OS on Amazon AWS using Ansible called &lt;a href=&quot;https://github.com/olatheander/ansible-dcos-aws-playbook&quot;&gt;ansible-dcos-aws-playbook&lt;/a&gt; (hosted on GitHub). I’m really interested in the technology and ideas that emerged in recent years and that is rapidly becoming mainstream, i.e. containers (Docker), container orchestration (Mesos, DC/OS, Kubernetes etc.), cloud native applications and infrastructure-as-code. There are quite many ways that you can experiment with this technology, it’s a breeze configuring a basic DC/OS cluster on AWS using a CloudFormation template and is equally simple on Azure. This is all good but I don’t quite fancy the wizard approach even if its admittedly handy.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://blog.myola.se/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.3.0">Jekyll</generator><link href="http://blog.myola.se/feed.xml" rel="self" type="application/atom+xml" /><link href="http://blog.myola.se/" rel="alternate" type="text/html" /><updated>2016-11-17T02:05:20+01:00</updated><id>http://blog.myola.se//</id><title type="html">Ola Theander’s blog</title><subtitle>Software Engineer with special interest in Distributed Computing and Cloud Technology</subtitle><entry><title type="html">Provisioning DC/OS on AWS using Ansible</title><link href="http://blog.myola.se/Ansible-DCOS-AWS/" rel="alternate" type="text/html" title="Provisioning DC/OS on AWS using Ansible" /><published>2016-11-16T00:00:00+01:00</published><updated>2016-11-16T00:00:00+01:00</updated><id>http://blog.myola.se/Ansible-DCOS-AWS</id><content type="html" xml:base="http://blog.myola.se/Ansible-DCOS-AWS/">&lt;p&gt;In this first post I’ll present my current pet project for provisioning DC/OS on Amazon AWS using Ansible called &lt;a href=&quot;https://github.com/olatheander/ansible-dcos-aws-playbook&quot;&gt;ansible-dcos-aws-playbook&lt;/a&gt; (hosted on GitHub). I’m really interested in the technology and ideas that emerged in recent years and that is rapidly becoming mainstream, i.e. containers (Docker), container orchestration (Mesos, DC/OS, Kubernetes etc.), cloud native applications and infrastructure-as-code. There are quite many ways that you can experiment with this technology, it’s a breeze configuring a basic DC/OS cluster on AWS using a CloudFormation template and is equally simple on Azure. This is all good but I don’t quite fancy the wizard approach even if its admittedly handy.&lt;/p&gt;
 
 &lt;p&gt;What I would like to have is a way to automatically and consistently setup and tear down a cluster over and over, according to &lt;em&gt;immutable infrastructure&lt;/em&gt; and &lt;em&gt;infrastructure-as-code&lt;/em&gt; principles. This gives the freedom to experiment and if something is messed up, just tear down the cluster and build it up again and you will have a fresh start. By having the cluster setup defined by code, in this case an Ansible playbook, the cluster configuration can be debugged and improved over time, just like any software code. Doing stuff manually doesn’t quite provide the same consistency.&lt;/p&gt;
 
@@ -38,21 +38,27 @@ $ ssh-add ~/.ssh/&amp;lt;amazon key file&amp;gt;
 
 &lt;h2 id=&quot;getting-started&quot;&gt;Getting started&lt;/h2&gt;
 &lt;p&gt;Begin by cloning the repository&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ git clone https://github.com/olatheander/ansible-dcos-aws-playbook.git
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+
 &lt;p&gt;Initialize the Git submodules (the generic Ansible roles are included in the playbook as submodules)&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ git submodule update --recursive --init
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
 &lt;p&gt;Configure the AWS environment variables:&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ export AWS_EC2_KEY_PAIR = &amp;lt;the name of the key-pair for EC2 instances&amp;gt;
 $ export AWS_EC2_LB_CERT = &amp;lt;the arn resource for the AWS ELB certificate&amp;gt;
 $ export AWS_S3_ELB_LOGS_BUCKET_NAME = &amp;lt;the name of the S3 bucket where to store the ELB logs&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+
 &lt;p&gt;By defining these two variables a simple hello-world demo is installed on the cluster that we will later experiment with.&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ export DCOS_CONTROLLER_INSTALL_DEMOS = true
 $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
 &lt;/code&gt;&lt;/pre&gt;
@@ -67,6 +73,7 @@ $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;project-layout&quot;&gt;Project layout&lt;/h3&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.
 |-- community
 |   `-- roles
@@ -81,14 +88,17 @@ $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
     `-- aws
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+
 &lt;p&gt;If you have some previous experience of Ansible this is probably old hat (read more about &lt;a href=&quot;http://docs.ansible.com/ansible/playbooks_best_practices.html&quot;&gt;best-practices&lt;/a&gt;) but worth mentioning is the reusable roles included that are all stored in &lt;code class=&quot;highlighter-rouge&quot;&gt;./community/roles&lt;/code&gt;
  as Git submodules. This is also the option of using &lt;a href=&quot;https://galaxy.ansible.com/&quot;&gt;Ansible Galaxy&lt;/a&gt;, recently open-sourced, but I prefer the submodule approach.&lt;/p&gt;
 
 &lt;h2 id=&quot;run-playbooks-to-setup-the-cluster&quot;&gt;Run playbooks to setup the cluster&lt;/h2&gt;
 &lt;p&gt;Setting up the cluster consists of running two playbooks, first:&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ansible-playbook -i ec2.py main.yml
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+
 &lt;p&gt;This playbook configures the AWS infrastructure by allocating EC2 instances, setting up VPC, load-balancer, network gateways etc. Running the playbook, you will see a lot of tasks scrolling by and it will take a few minutes to complete. When done there should be no errors and a message like:&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TASK [debug] *******************************************************************
@@ -110,9 +120,11 @@ localhost                  : ok=18   changed=3    unreachable=0    failed=0
 &lt;p&gt;&lt;strong&gt;Note, dont keep the cluster running for long&lt;/strong&gt; if you’re just experimenting. Tear down the cluster when done, see end of this article for instructions. For DCOS to be able to schedule containers onto the nodes its better to have fewer big nodes rather than many small since the scheduler may not be able to find a node with enough free resources if nodes are too small. The downside is that this node type is pretty expensive.&lt;/p&gt;
 
 &lt;p&gt;Next step is to provision the allocated resources i.e. setting up a DCOS cluster on top. Do this by running the playbook &lt;code class=&quot;highlighter-rouge&quot;&gt;provision_cluster.yml&lt;/code&gt;. This playbook is basically a straightforward implementation of the &lt;a href=&quot;https://dcos.io/docs/1.9/administration/installing/custom/advanced/&quot;&gt;Advanced DC/OS Installation Guide&lt;/a&gt;.&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ansible-playbook -i ec2.py provision_cluster.yml -u ubuntu
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+
 &lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;-u&lt;/code&gt; switch tells Ansible which user to use when authenticating towards the EC2 instances. By default, the AMI (&lt;code class=&quot;highlighter-rouge&quot;&gt;ami-c06b1eb3&lt;/code&gt;) provisioned is &lt;em&gt;Ubuntu Xenial 16.04&lt;/em&gt; but &lt;em&gt;CentOS&lt;/em&gt; and eventually &lt;em&gt;CoreOS&lt;/em&gt; will also be supported. &lt;code class=&quot;highlighter-rouge&quot;&gt;-i&lt;/code&gt; is the inventory parameter and &lt;code class=&quot;highlighter-rouge&quot;&gt;ec2.py&lt;/code&gt; is the &lt;a href=&quot;http://docs.ansible.com/ansible/intro_dynamic_inventory.html&quot;&gt;dynamic inventory&lt;/a&gt; script for AWS.&lt;/p&gt;
 
 &lt;p&gt;When running you might face an error like below and the reason is most likely that the instances are not fully initialized yet. If this happens cancel the playbook and retry. When all nodes can be reached, let the playbook run to completion. I plan to fix this bug in a later version of the playbook by waiting until all nodes respond to SSH connections.&lt;/p&gt;
@@ -125,6 +137,7 @@ fatal: [10.0.1.217]: UNREACHABLE! =&amp;gt; {&quot;changed&quot;: false, &quot;m
 &lt;p&gt;There will also be a couple of ignored error related to python-pip but this is normal and just the role checking if pip is installed.&lt;/p&gt;
 
 &lt;p&gt;It will take a couple of minutes setting up the cluster. Once the playbook is done you will see output like:&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TASK [dcos-controller : Launch external Dockercloud hello-world sample application.] ***
 changed: [10.0.0.250]
 
@@ -143,6 +156,7 @@ PLAY RECAP *********************************************************************
 &lt;/div&gt;
 
 &lt;h2 id=&quot;play-with-the-cluster&quot;&gt;Play with the cluster&lt;/h2&gt;
+
 &lt;p&gt;Now that the cluster is up let’s play with it for a bit. By defining the environment variables &lt;code class=&quot;highlighter-rouge&quot;&gt;DCOS_CONTROLLER_INSTALL_DEMOS&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD&lt;/code&gt; the cluster is already up and running with the &lt;a href=&quot;https://github.com/mesosphere/marathon-lb&quot;&gt;Marathon load-balancer&lt;/a&gt; and a simple Hello-world application that we can use to get to know the setup a bit better.&lt;/p&gt;
 
 &lt;p&gt;First let’s check the AWS ELB status since it may take some time for it to detect the nodes being up and running.&lt;/p&gt;
@@ -154,11 +168,15 @@ PLAY RECAP *********************************************************************
 &lt;p&gt;&lt;img src=&quot;/images/posts/2016-11-16-Ansible-DCOS-AWS/Dockercloud Hello-world.png&quot; alt=&quot;_config.yml&quot; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;log-in-on-the-dcos-admin&quot;&gt;Log in on the DCOS admin&lt;/h3&gt;
+
 &lt;p&gt;To be able to do some interesting stuff we need to be able to access the DCOS admin console and thats done by opening a SSH tunnel via the &lt;em&gt;dcos-ssh-jumphost&lt;/em&gt; instance as:&lt;/p&gt;
+
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ssh -i &amp;lt;path-to-ssh-key&amp;gt; -L 8443:&amp;lt;master-private-dns&amp;gt;:443 ubuntu@&amp;lt;public-dns-of-ssh-jumphost&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+
 &lt;p&gt;where&lt;/p&gt;
+
 &lt;ul&gt;
   &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;path-to-ssh-key&lt;/code&gt; — your private key used above for provisioning the cluster nodes. The &lt;code class=&quot;highlighter-rouge&quot;&gt;-i&lt;/code&gt; switch is not needed if you’re setting up the tunnel from your &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh-agent&lt;/code&gt; shell.&lt;/li&gt;
   &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;master-private-dns&lt;/code&gt; — the private DNS name of one of the &lt;em&gt;dcos-master&lt;/em&gt; nodes, e.g. &lt;code class=&quot;highlighter-rouge&quot;&gt;ip-10-0-1-217.eu-west-1.compute.internal&lt;/code&gt;.&lt;/li&gt;
