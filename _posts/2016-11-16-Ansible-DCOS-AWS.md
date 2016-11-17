@@ -183,15 +183,19 @@ where
 * `public-dns-of-ssh-jumphost` --- the public DNS name of the ssh-jumphost node, e.g. `ec2-52-213-150-225.eu-west-1.compute.amazonaws.com`.
 
 When the tunnel is up you can now access the admin console at [https://localhost:8443](https://localhost:8443).
+
 ![_config.yml]({{ site.baseurl }}/images/posts/2016-11-16-Ansible-DCOS-AWS/DCOS admin console.png)
 
 Click on the _docker-cloud-hello-world_ service and you'll see on the detail view that we have a single instance of the application running: 
+
 ![_config.yml]({{ site.baseurl }}/images/posts/2016-11-16-Ansible-DCOS-AWS/dockercloud-hello-world service.png)
 
 Let's try and scale it. Press the _Scale_ button in the upper right corner and scale it to three instances. After a few seconds there should now be three instances running:
+
 ![_config.yml]({{ site.baseurl }}/images/posts/2016-11-16-Ansible-DCOS-AWS/hello-world scaled to three.png)
 
 Refresh the web-page a couple of times and you will see that its automatically load-balanced in a round-robin fashion (notice the hostname changing):
+
 ![_config.yml]({{ site.baseurl }}/images/posts/2016-11-16-Ansible-DCOS-AWS/hello-world host name.png)
 
 Scale it back down to one instance and you will have only one hostname. Pretty awesome I think.
