@@ -128,14 +128,7 @@ $ ansible-playbook -i ec2.py provision_cluster.yml -u ubuntu
 
 The `-u` switch tells Ansible which user to use when authenticating towards the EC2 instances. By default, the AMI (`ami-c06b1eb3`) provisioned is _Ubuntu Xenial 16.04_ but _CentOS_ and eventually _CoreOS_ will also be supported. `-i` is the inventory parameter and `ec2.py` is the [dynamic inventory](http://docs.ansible.com/ansible/intro_dynamic_inventory.html) script for AWS.
 
-When running you might face an error like below and the reason is most likely that the instances are not fully initialized yet. If this happens cancel the playbook and retry. When all nodes can be reached, let the playbook run to completion. I plan to fix this bug in a later version of the playbook by waiting until all nodes respond to SSH connections.
-
-```
-TASK [raw] *********************************************************************
-fatal: [10.0.1.217]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: Connection timed out during banner exchange\r\n", "unreachable": true}
-```
-
-There will also be a couple of ignored error related to python-pip but this is normal and just the role checking if pip is installed.
+There will be a couple of ignored errors related to python-pip but this is normal and just the role checking if pip is installed.
 
 It will take a couple of minutes setting up the cluster. Once the playbook is done you will see output like:
 
