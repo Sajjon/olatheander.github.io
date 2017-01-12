@@ -73,6 +73,8 @@ $ export DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD = true
 * The `DCOS_CONTROLLER_INSTALL_DEMOS` variable is a generic switch for installing demo(s). When false this section is skipped altogether.
 * The `DCOS_CONTROLLER_INSTALL_DOCKERCLOUD_HELLO_WORLD` toggles the installation of the [Dockercloud Hello World](https://github.com/docker/dockercloud-hello-world) Docker container demo.
 
+For the full list of environment variables checkout the *ansible-dcos-aws-playbook* [README](https://github.com/olatheander/ansible-dcos-aws-playbook/blob/master/README.md) and the _ansible-dcos-controller_ [README](https://github.com/olatheander/ansible-dcos-controller/blob/master/README.md).
+
 ### Project layout
 
 ```
